@@ -17,22 +17,42 @@ int main(int argc, char *argv[]){
 
   GPIO gpio;
   Time tm;
-  std::string data;
-  
-  if (command == "get"){
+  std::string data, startTime;
+  startTime = "**************";
 
-    std::cout << "Getting current data" << std::endl;
-    data = gpio.gpioReadTimer() + gpio.gpioReadStatus() + gpio.gpioReadUnit(1) + gpio.gpioReadUnit(2) + gpio.gpioReadUnit(3);
+
+  //Start recording
+  if (command == "start"){
+    //Make sure not already recording
+    if(gpio.alreadyStarted() == true)
+      std::cout << "Already started. Ignoring command." << std::endl;
+    else{
+      std::cout << "Starting..." << std::endl;
+      //Get current time as start time
+      gpio.gpioWrite("start");
+      startTime = tm.getTime();
+    }
+  }
+  //Get the data
+  else if (command == "get"){
+
+    std::cout << "Getting current data..." << std::endl;
+    data = startTime + ", " + tm.getTime() + ", " + gpio.gpioReadTimer() + gpio.gpioReadStatus() + gpio.gpioReadUnit(1) + gpio.gpioReadUnit(2) + gpio.gpioReadUnit(3);
     std::cout << data << std::endl;
     
   }
-  else if (command == "start"){
-    if(gpio.alreadyStarted() == true)
-      std::cout << "Already started." << std::endl;
-    else
-      std::cout << "Not started." << std::endl;
+  //Stop the count
+  else if (command == "stop"){
+    gpio.gpioWrite("stop");
+    data = startTime + ", " + tm.getTime() + ", " + gpio.gpioReadTimer() + gpio.gpioReadStatus() + gpio.gpioReadUnit(1) + gpio.gpioReadUnit(2) + gpio.gpioReadUnit(3);
   }
-
+  //Reset the count
+  else if (command == "reset"){
+    gpio.gpioWrite("reset");
+    startTime = "**************";
+  }
+  else
+    std::cout << "Incorrect command passed." << std::endl;
 
   
   return 0;
