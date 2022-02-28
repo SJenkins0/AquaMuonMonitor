@@ -1,7 +1,7 @@
 #include <iostream>
 #include <unistd.h>
 #include <string>
-#include <iostream>
+#include <fstream>
 #include <vector>
 #include <algorithm>
 #include "gpioOpe.h"
@@ -60,6 +60,10 @@ int main(int argc, char *argv[]){
 
 
   std::string command;
+  std::string filename;
+  bool read=false;
+  bool operate=false;
+  bool update=false;
 
   if(argc<2){
     std::cout << "[ERROR]: Arguments required!" << std::endl;
@@ -67,27 +71,36 @@ int main(int argc, char *argv[]){
   }
 
   int option;
-  while((option = getopt(argc, argv, ":c:h")) != -1){
+  while((option = getopt(argc, argv, ":c:r:uh")) != -1){
     switch(option)
       {
       case 'c':
 	command = optarg;
+	operate = true;
+	break;
+      case 'r':
+	filename = optarg;
+	read = true;
+	break;
+      case 'u':
+	update=true;
 	break;
       case 'h':
-	std::cout << "IMPORTANT - sudo required due to GPIO permissions!" << std::endl;
 	std::cout << "Usage:" << std::endl;
 	std::cout << "-c : Pass command to system. Command options: get, start, stop, reset.\n"
+		  << "-r : Read data out. Requires specification of file to output to.\n"
+		  << "-u : Update output file. Default is to override. Only works with -r option.\n"
 		  << "-h : Display this message.\n";
 	exit(0);
       case ':':
-	printf("[ERROR]: -%c requires an argument to pass command.\n", optopt);
+	printf("[ERROR]: -%c requires an argument. Consider -h for help.\n", optopt);
 	exit(1);
       case '?':
 	printf("[ERROR]: -%c is an unknown argument. Consider -h for help.\n", optopt);
 	exit(1);
 	
       default:
-	std::cout << "[ERROR]: command argument -c required. Consider -h for help." << std::endl;
+	std::cout << "[ERROR]: Argument required. Consider -h for help." << std::endl;
 	exit(1);
       }
   }
@@ -98,42 +111,65 @@ int main(int argc, char *argv[]){
   std::string data, startTime;
   startTime = "**************";
 
+  //Operating system using -c
+  if(operate){
 
-  //Start recording
-  if (command == "start"){
-    //Make sure not already recording
-    if(gpio.alreadyStarted() == true)
-      std::cout << "Already started. Ignoring command." << std::endl;
-    else{
-      std::cout << "Starting..." << std::endl;
-      //Get current time as start time
-      gpio.gpioWrite("start");
-      startTime = tm.getTime();
+    //Start recording
+    if (command == "start"){
+      //Make sure not already recording
+      if(gpio.alreadyStarted() == true)
+	std::cout << "Already started. Ignoring command." << std::endl;
+      else{
+	std::cout << "Starting..." << std::endl;
+	//Get current time as start time
+	gpio.gpioWrite("start");
+	startTime = tm.getTime();
+      }
     }
-  }
-  //Get the data
-  else if (command == "get"){
+    //Get the data
+    else if (command == "get"){
 
-    std::cout << "Getting current data..." << std::endl;
-    std::string time = tm.getTime();
-    data = gpio.gpioReadTimer() + gpio.gpioReadUnit(1) + gpio.gpioReadUnit(2) + gpio.gpioReadUnit(3);
-    //std::cout << data << std::endl;
-    output(data, time, gpio.alreadyStarted());
+      std::cout << "Getting current data..." << std::endl;
+      std::string time = tm.getTime();
+      data = gpio.gpioReadTimer() + gpio.gpioReadUnit(1) + gpio.gpioReadUnit(2) + gpio.gpioReadUnit(3);
+      //std::cout << data << std::endl;
+      output(data, time, gpio.alreadyStarted());
+    
+    }
+    //Stop the count
+    else if (command == "stop"){
+      gpio.gpioWrite("stop");
+    }
+    //Reset the count
+    else if (command == "reset"){
+      gpio.gpioWrite("reset");
+      startTime = "**************";
+    }
+    else
+      std::cout << "Incorrect command passed." << std::endl;
+
+  }
+
+  //When reading data with -r outfile
+  if(read){
+
+    std::ofstream outfile;
+    if(update)
+      outfile.open(filename, ios::app);
+    else
+      outfile.open(filename);
+
+    if(outfile.is_open()){
+      data = tm.getTime() + ", " + gpio.gpioReadTimer() + gpio.gpioReadUnit(1) + gpio.gpioReadUnit(2) + gpio.gpioReadUnit(3);
+      outfile << data << std::endl;
+
+      outfile.close();
+      
+    }
+    else printf("[ERROR]: Unable to open output file %s.\n", filename.c_str());
     
   }
-  //Stop the count
-  else if (command == "stop"){
-    gpio.gpioWrite("stop");
-  }
-  //Reset the count
-  else if (command == "reset"){
-    gpio.gpioWrite("reset");
-    startTime = "**************";
-  }
-  else
-    std::cout << "Incorrect command passed." << std::endl;
-
-  
+   
   return 0;
   
 }
