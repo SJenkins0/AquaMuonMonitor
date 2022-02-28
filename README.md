@@ -6,4 +6,8 @@ $ g++ -o AquaMuonMonitor AquaMuonMonitor.cxx timeOpe.cpp gpioOpe.cpp -L/usr/loca
 To run:
 $ sudo ./AquaMuonMonitor [command]
 
-sudo is required to run, in order to access GPIO
+IMPORTANT - sudo required due to GPIO permissions!
+Usage:
+-c : Pass command to system. Command options: get, start, stop, reset.
+-h : Display this message.
+
