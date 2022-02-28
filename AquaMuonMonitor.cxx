@@ -44,7 +44,7 @@ void output(std::string data, std::string time, bool running){
     std::cout << "#\t\t\t\t\t\t\t\t\t\t#"                             << std::endl;
   for(int i=0; i<A.size(); i++){
     if(i<10)
-      printf("#\t D%i \t%s\t\t%s\t\t%s\t#\n",i, A[i].c_str(), B[i].c_str(), C[i].c_str());
+      printf("#\t D%i \t%s\t\t%s\t\t%s\t#\n",i+1, A[i].c_str(), B[i].c_str(), C[i].c_str());
     else
       printf("#  Overflow\t    %s\t\t    %s\t\t    %s\t#\n",A[i].c_str(), B[i].c_str(), C[i].c_str());
   }
