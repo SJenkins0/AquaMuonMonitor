@@ -12,6 +12,7 @@
 //Take the data and print it to screen in a reader friendly format
 void output(std::string data, std::string time, bool running){
 
+  const double secs = 86400;
   char del = ',';
   std::vector<string> val;
   std::string count;
@@ -33,11 +34,14 @@ void output(std::string data, std::string time, bool running){
     else           C.push_back(val.at(i));
   }
 
+  std::string days;
+  days = std::to_string( std::stod(count)/secs);
+
   //Formatting
   std::cout << "################################### UK-HKMSDD ###################################" << std::endl;
   std::cout << "#\t\t\t\t\t\t\t\t\t\t#"                               << std::endl;
   std::cout << "#\t\tCurrent time (JST):\t" << time << "\t\t\t#"      << std::endl;
-  std::cout << "#\t\tTime since start /s:\t" << count << "\t\t\t\t#"  << std::endl;
+  std::cout << "#\t\tTime since start /s:\t" << count << " (" << days << " days)\t\t#"  << std::endl;
   std::cout << "#\t\tStatus:\t\t\t" << status << "\t\t\t\t#"        << std::endl;
   std::cout << "#\t\t\t\t\t\t\t\t\t\t#"                               << std::endl;
   std::cout << "#\t\t    A \t\t\t    B \t\t       Coincidence \t#"    << std::endl;
