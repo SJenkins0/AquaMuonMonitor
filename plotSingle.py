@@ -1,3 +1,6 @@
+#these first two lines are required for running through cron
+import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 import pandas as pd
 
@@ -17,8 +20,8 @@ diffA.drop(df.index[0], inplace=True)
 diffB.drop(df.index[0], inplace=True)
 
 
-ax=diffA.plot(style='.-', figsize=(16,9))
-diffB.plot(style='.--',ax=ax, figsize=(16,9))
+ax=diffA.plot(style='.-', figsize=(8,6))
+diffB.plot(style='.--',ax=ax, figsize=(8,6))
 
 plt.ylabel('Counts')
 plt.xlabel('Time (JST)')
